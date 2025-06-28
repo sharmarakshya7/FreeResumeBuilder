@@ -20,5 +20,4 @@ This is a web-based, user-friendly resume builder designed to help users create 
 - HTML5
 - CSS3
 - JavaScript
-- (Optional) FileSaver.js or docx.js for file export functionality
 
