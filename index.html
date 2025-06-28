@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS Resume Builder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.5.0/docx.min.js"></script>
+    <!-- html2pdf -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<!-- docx.js -->
+<script src="https://unpkg.com/docx@7.7.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <!-- Mammoth.js for Word document parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    
+    <!-- JSZip for handling compressed files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #FFFFF0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #2b3618, #3a4723);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+            to { text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.5); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #2b3618, #3a4723);
+            color: white;
+            padding: 120px 0 80px;
+            text-align: center;
+            margin-top: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.05)" points="0,0 1000,300 1000,1000 0,700"/></svg>');
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            padding: 4rem 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .preview-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 2rem;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            background: #2b3618;
+            color: white;
+            padding: 1rem;
+            margin: -2rem -2rem 2rem -2rem;
+            border-radius: 15px 15px 0 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2b3618;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2b3618;
+            box-shadow: 0 0 0 3px rgba(43, 54, 24, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .add-btn, .remove-btn, .nav-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0.5rem 0.5rem 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .add-btn {
+            background: #2b3618;
+            color: white;
+        }
+
+        .add-btn:hover {
+            background: #3a4723;
+            transform: translateY(-2px);
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .remove-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .tab-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+        }
+
+        .nav-btn {
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+
+/* Scan Resume Styles */
+.scan-section {
+    text-align: center;
+    padding: 2rem;
+background: #2b3618;
+    margin: 2rem 0;
+    border-radius: 12px;
+    color: white;
+}
+
+.scan-section h3 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.scan-btn {
+    background: #fff;
+    color:  #2b3618;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.scan-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.scan-results {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.scan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.scan-score {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 8px;
+    min-width: 120px;
+}
+
+.score-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.score-text {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.scan-excellent {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.scan-good {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.scan-needs-work {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.scan-poor {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.scan-assessment {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.scan-list {
+    list-style: none;
+    padding: 0;
+}
+
+.scan-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.scan-list li:last-child {
+    border-bottom: none;
+}
+
+.scan-pass {
+    color: #155724;
+}
+
+.scan-warning {
+    color: #856404;
+}
+
+.scan-fail {
+    color: #721c24;
+}
+
+.scan-bonus {
+    color: #0c5460;
+}
+
+.scan-tips {
+    background: #e7f3ff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    border-left: 4px solid #0066cc;
+}
+
+.scan-tips h4 {
+    color: #0066cc;
+    margin-bottom: 1rem;
+}
+
+.scan-tips ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.scan-tips li {
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+/* Container for scanned resume results */
+#scan-results {
+    display: none;
+    background: #2b3618;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Header inside the scan result section */
+.scan-header h3 {
+    margin-bottom: 1.5rem;
+    font-size: 1.6rem;
+    font-weight: bold;
+}
+
+/* Upload section layout */
+.upload-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+/* Options container */
+.upload-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    width: 100%;
+}
+
+/* Individual upload option */
+.upload-option {
+    background: #3c4d24;
+    padding: 1.5rem;
+    border-radius: 12px;
+    width: 280px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Headings inside upload options */
+.upload-option h4 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: #ffffff;
+}
+
+/* Buttons */
+.upload-btn, .scan-form-btn {
+    background: #ffffff;
+    color: #2b3618;
+    border: none;
+    padding: 10px 24px;
+    font-size: 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-btn:hover, .scan-form-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+}
+
+/* Divider "OR" text */
+.upload-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #ccc;
+}
+
+/* Upload status message */
+.upload-status {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #d1d1d1;
+}
+
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .save-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .next-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .next-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .complete-btn {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .complete-btn:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+
+        .preview-toggle {
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .preview-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .preview-btn:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            display: none;
+            border: 1px solid #c3e6cb;
+        }
+
+        .download-section {
+            text-align: center;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, #2b3618, #3a4723);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .download-btn {
+            background: white;
+            color: #2b3618;
+            border: none;
+            padding: 1rem 2rem;
+            margin: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+        }
+
+        .resume-preview {
+            background: white;
+            padding: 2rem;
+            font-family: Arial, sans-serif;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .resume-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #2b3618;
+        }
+
+        .resume-name {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2b3618;
+            margin-bottom: 0.5rem;
+        }
+
+        .resume-contact {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .resume-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .resume-section-title {
+            background: #2b3618;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .resume-item {
+            margin-bottom: 1rem;
+        }
+
+        .resume-item-header {
+            font-weight: bold;
+            color: #2b3618;
+        }
+
+        .resume-item-subheader {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+
+        .resume-item ul {
+            margin-left: 1rem;
+        }
+
+        .footer {
+            background: #2b3618;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #2b3618;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .preview-section {
+                position: static;
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+
+            .tab-navigation {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .tab-navigation .nav-actions {
+                display: flex;
+                gap: 1rem;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div>
+                <div class="logo">Free Resume Builder</div>
+              
+            </div>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#builder">Builder</a>
+                <a href="#about">About</a>
+            </div>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="container">
+            <h1>Professional ATS Resume Builder</h1>
+            <p>Create a free professional, ATS-friendly resume that gets you noticed by recruiters</p>
+       
+        </div>   
+    </section>
+    
+         <div class="scan-section">
+    <h3>Optimize Your Resume</h3>
+    <button class="scan-btn" onclick="scanResume()"> Scan My Resume</button>
+</div>
+
+ 
+
+   
+
+<div id="scan-results" class="scan-results" style="display:none;"></div>
+
+
+    <div id="builder" class="container">
+        <div class="main-content">
+            <div class="form-section">
+                <div class="section-title">Resume Information</div>
+                
+                <div class="tab-container">
+                    <button class="tab active" onclick="showTab('contact')">Contact</button>
+                    <button class="tab" onclick="showTab('summary')">Summary</button>
+                    <button class="tab" onclick="showTab('skills')">Skills</button>
+                    <button class="tab" onclick="showTab('experience')">Experience</button>
+                    <button class="tab" onclick="showTab('education')">Education</button>
+                </div>
+
+                <div id="contact-tab" class="tab-content active">
+                    <h3>Contact Information</h3>
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="fullName" placeholder="Enter your full name">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" id="phone" placeholder="(555) 123-4567">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" id="email" placeholder="your.email@example.com">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>LinkedIn Profile</label>
+                            <input type="url" id="linkedin" placeholder="https://linkedin.com/in/yourprofile">
+                        </div>
+                        <div class="form-group">
+                            <label>GitHub Profile</label>
+                            <input type="url" id="github" placeholder="https://github.com/yourusername">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Location *</label>
+                        <input type="text" id="location" placeholder="City, State">
+                    </div>
+
+                    <div class="tab-navigation">
+                        <button class="nav-btn back-btn" onclick="previousTab()" id="contactBackBtn" style="visibility: hidden;">← Back</button>
+                        <button class="nav-btn save-btn" onclick="saveProgress()">💾 Save Progress</button>
+                        <button class="nav-btn next-btn" onclick="nextTab()" id="contactNextBtn">Next: Summary →</button>
+                    </div>
+                </div>
+
+                <div id="summary-tab" class="tab-content">
+                    <h3>Professional Summary</h3>
+                    <div class="form-group">
+                        <label>Professional Summary (2-4 lines) *</label>
+                        <textarea id="summary" rows="4" placeholder="Results-driven Java Developer with 3+ years of experience in banking systems, REST API development, and cloud deployment. Strong in Spring Boot, MySQL, and Agile methodology."></textarea>
+                    </div>
+
+                    <div class="tab-navigation">
+                        <button class="nav-btn back-btn" onclick="previousTab()" id="summaryBackBtn">← Back: Contact</button>
+                        <button class="nav-btn save-btn" onclick="saveProgress()">💾 Save Progress</button>
+                        <button class="nav-btn next-btn" onclick="nextTab()" id="summaryNextBtn">Next: Skills →</button>
+                    </div>
+                </div>
+
+                <div id="skills-tab" class="tab-content">
+                    <h3>Technical Skills</h3>
+                    <div id="skills-container">
+                        <div class="skill-group">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <input type="text" class="skill-category" placeholder="Languages">
+                                </div>
+                                <div class="form-group">
+                                    <label>Skills (comma separated)</label>
+                                    <input type="text" class="skill-items" placeholder="Java, JavaScript, SQL">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addSkillGroup()">+ Add Skill Category</button>
+
+                    <div class="tab-navigation">
+                        <button class="nav-btn back-btn" onclick="previousTab()" id="skillsBackBtn">← Back: Summary</button>
+                        <button class="nav-btn save-btn" onclick="saveProgress()">💾 Save Progress</button>
+                        <button class="nav-btn next-btn" onclick="nextTab()" id="skillsNextBtn">Next: Experience →</button>
+                    </div>
+                </div>
+
+                <div id="experience-tab" class="tab-content">
+                    <h3>Professional Experience</h3>
+                    <div id="experience-container">
+                        <div class="experience-item">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Job Title *</label>
+                                    <input type="text" class="job-title" placeholder="Java Developer">
+                                </div>
+                                <div class="form-group">
+                                    <label>Company Name *</label>
+                                    <input type="text" class="company" placeholder="XYZ Bank">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Location</label>
+                                    <input type="text" class="job-location" placeholder="Virginia">
+                                </div>
+                                <div class="form-group">
+                                    <label>Duration *</label>
+                                    <input type="text" class="duration" placeholder="Jan 2022 – Present">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Responsibilities (one per line) *</label>
+                                <textarea class="responsibilities" rows="4" placeholder="• Developed and deployed secure loan management modules using Spring Boot&#10;• Integrated REST APIs with external payment gateway using JSON"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addExperience()">+ Add Experience</button>
+                    
+                    <h3 style="margin-top: 2rem;">Projects (Optional)</h3>
+                    <div id="projects-container">
+                        <div class="project-item">
+                            <div class="form-group">
+                                <label>Project Name</label>
+                                <input type="text" class="project-name" placeholder="E-commerce Platform">
+                            </div>
+                            <div class="form-group">
+                                <label>Technologies Used</label>
+                                <input type="text" class="project-tech" placeholder="React, Node.js, MongoDB">
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="project-desc" rows="3" placeholder="• Built full-stack e-commerce application&#10;• Implemented secure payment processing"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addProject()">+ Add Project</button>
+
+                    <div class="tab-navigation">
+                        <button class="nav-btn back-btn" onclick="previousTab()" id="experienceBackBtn">← Back: Skills</button>
+                        <button class="nav-btn save-btn" onclick="saveProgress()">💾 Save Progress</button>
+                        <button class="nav-btn next-btn" onclick="nextTab()" id="experienceNextBtn">Next: Education →</button>
+                    </div>
+                </div>
+
+                <div id="education-tab" class="tab-content">
+                    <h3>Education</h3>
+                    <div id="education-container">
+                        <div class="education-item">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Degree *</label>
+                                    <input type="text" class="degree" placeholder="Bachelor of Science in Computer Science">
+                                </div>
+                                <div class="form-group">
+                                    <label>University *</label>
+                                    <input type="text" class="university" placeholder="Virginia Tech">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Graduation Year</label>
+                                    <input type="text" class="grad-year" placeholder="2021">
+                                </div>
+                                <div class="form-group">
+                                    <label>GPA (Optional)</label>
+                                    <input type="text" class="gpa" placeholder="3.8/4.0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addEducation()">+ Add Education</button>
+                    
+                    <h3 style="margin-top: 2rem;">Certifications (Optional)</h3>
+                    <div id="certifications-container">
+                        <div class="certification-item">
+                            <div class="form-group">
+                                <label>Certification Name</label>
+                                <input type="text" class="cert-name" placeholder="AWS Certified Developer – Associate">
+                            </div>
+                            <div class="form-group">
+                                <label>Issuing Organization</label>
+                                <input type="text" class="cert-org" placeholder="Amazon Web Services">
+                            </div>
+                            <div class="form-group">
+                                <label>Date Obtained</label>
+                                <input type="text" class="cert-date" placeholder="March 2023">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addCertification()">+ Add Certification</button>
+                    
+
+                    <div class="tab-navigation">
+                        <button class="nav-btn back-btn" onclick="previousTab()" id="educationBackBtn">← Back: Experience</button>
+                        <button class="nav-btn save-btn" onclick="saveProgress()">💾 Save Progress</button>
+                        <button class="nav-btn complete-btn" onclick="completeResume()" id="educationCompleteBtn">✅ Complete Resume</button>
+                    </div>
+                </div>
+
+                <div class="success-message" id="successMessage">Resume saved successfully!</div>
+
+                <div class="download-section">
+                    <h3>Download Your Resume</h3>
+                    
+                    <button class="download-btn" onclick="downloadDOCX()">📝 Download DOCX</button>
+                    <button class="download-btn" onclick="printResume()">🖨️ Print Resume</button>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <div class="section-title">Live Preview</div>
+                <div class="preview-toggle">
+                    <button class="preview-btn" onclick="togglePreviewMode()">👁️ Full Screen Preview</button>
+                </div>
+                <div id="resume-preview" class="resume-preview">
+                    <div class="resume-header">
+                        <div class="resume-name">Your Name</div>
+                        <div class="resume-contact">Phone | Email | Location</div>
+                    </div>
+                    
+                    <div class="resume-section">
+                        <div class="resume-section-title">PROFESSIONAL SUMMARY</div>
+                        <p>Your professional summary will appear here...</p>
+                    </div>
+                    
+                    <div class="resume-section">
+                        <div class="resume-section-title">TECHNICAL SKILLS</div>
+                        <p>Your skills will appear here...</p>
+                    </div>
+                    
+                    <div class="resume-section">
+                        <div class="resume-section-title">PROFESSIONAL EXPERIENCE</div>
+                        <p>Your experience will appear here...</p>
+                    </div>
+                    
+                    <div class="resume-section">
+                        <div class="resume-section-title">EDUCATION</div>
+                        <p>Your education will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section id="about" class="hero" style="margin-top: 0;">
+        <div class="container">
+            <h2>About ATS Resume Builder</h2>
+            <p>Our ATS-friendly resume builder helps you create professional resumes that pass through Applicant Tracking Systems and get noticed by hiring managers. Built with modern web technologies and optimized for recruiters.</p>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Copyright © Rakshya Sharma</p>
+        </div>
+    </footer>
+
+
+
+
+    <script src = "script.js" > </script>
+</body>
+</html>
