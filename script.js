@@ -31,6 +31,12 @@ function showTab(tabName) {
     currentTabIndex = tabs.indexOf(tabName);
 }
 
+function toggleMenu() {
+  const menu = document.getElementById("navMenu");
+  menu.classList.toggle("active");
+}
+
+
 function nextTab() {
     if (currentTabIndex < tabs.length - 1) {
         currentTabIndex++;
@@ -594,6 +600,7 @@ function downloadDOCX() {
 }
 
 
+
 function printResume() {
     collectData();
     renderPreview();
@@ -654,42 +661,22 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 // DOCX Resume Upload and Scanner
 function scanResume() {
-    const resultContainer = document.getElementById('scan-results');
-    resultContainer.style.display = 'block';
-    resultContainer.innerHTML = `
-        <div class="scan-header">
-            <h3>🔍 Upload Your Resume for ATS Scanning</h3>
-        </div>
-        
-        <div class="upload-section">
-            <div class="upload-options">
-                <div class="upload-option">
-                    <h4>📄 Upload Existing Resume</h4>
+  const scanContainer = document.getElementById("scan-section");
 
-                    <input type="file" id="resumeUpload" accept=".docx" style="display: none;">
-                    <button class="upload-btn" onclick="document.getElementById('resumeUpload').click()">
-                        📁 Choose DOCX File
-                    </button>
-                    <div id="upload-status" class="upload-status"></div>
-                </div>
-                
-                
-                <div class="upload-option">
-                    <h4>✏️ Scan Current Form</h4>
-                    
-                    <button class="scan-form-btn" onclick="scanCurrentForm()">
-                        🔍 Scan Form Data
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Add event listener for file upload
-    const fileInput = document.getElementById('resumeUpload');
-    fileInput.addEventListener('change', handleFileUpload);
-    
-    resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Fetch the UploadExistingResume HTML and inject it into the current page
+  fetch("./UploadExistingResume/index.html")
+    .then(response => {
+      if (!response.ok) throw new Error("Failed to load Scan section");
+      return response.text();
+    })
+    .then(data => {
+      scanContainer.innerHTML = data;
+      // Smooth scroll to the newly loaded section
+      scanContainer.scrollIntoView({ behavior: "smooth" });
+    })
+    .catch(error => {
+      scanContainer.innerHTML = `<p style="color:red; text-align:center;">Error: ${error.message}</p>`;
+    });
 }
 
 async function handleFileUpload(event) {
