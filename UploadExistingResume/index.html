@@ -1,0 +1,136 @@
+
+<style>
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #faf9ff;
+  }
+
+  .container-scan-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1rem;
+  }
+
+  .scan-header {
+    background: #ffffff;
+    border: 2px solid #362b55;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(54, 43, 85, 0.2);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 850px;
+  }
+
+  .upload-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .upload-option {
+    flex: 1 1 350px;
+    background: #f6f4fc;
+    border: 1px solid #d8d2ef;
+    border-radius: 15px;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+
+  .upload-option:hover {
+    background: #ece8f7;
+    transform: translateY(-4px);
+  }
+
+  .upload-option h4 {
+    color: #362b55;
+    font-size: 1.4rem;
+    margin-bottom: 1.2rem;
+    text-align: center;
+  }
+
+  .upload-btn,
+  .scan-form-btn {
+    background: #362b55;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.9rem 1.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .upload-btn:hover,
+  .scan-form-btn:hover {
+    background: #2b224a;
+    transform: scale(1.05);
+  }
+
+  .upload-status {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    color: #362b55;
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .upload-section {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .upload-option {
+      flex: 1 1 100%;
+      padding: 1.5rem;
+    }
+
+    .upload-option h4 {
+      font-size: 1.2rem;
+    }
+
+    .upload-btn,
+    .scan-form-btn {
+      padding: 0.8rem 1.4rem;
+      font-size: 1rem;
+    }
+  }
+</style>
+</head>
+
+<body>
+  <div class="container-scan-header">
+    <div class="scan-header">
+      <div class="upload-section">
+
+        <div class="upload-option">
+          <h4>📄 Upload Existing Resume</h4>
+          <input type="file" id="resumeUpload" accept=".docx" style="display:none;">
+          <button class="upload-btn" onclick="document.getElementById('resumeUpload').click()">Choose DOCX File</button>
+          <div id="upload-status" class="upload-status"></div>
+        </div>
+
+        <div class="upload-option">
+          <h4>🔍 Scan Current Form</h4>
+          <button class="scan-form-btn" onclick="scanCurrentForm()">Scan Form Data</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+function scanCurrentForm() {
+  alert("Scanning form data...");
+}
+</script>
+
+</body>
+</html>
